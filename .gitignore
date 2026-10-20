@@ -1,0 +1,59 @@
+# ==============================================================================
+# Git Ignore Configuration: Standalone CRNN-CTC OCR Project
+# ==============================================================================
+
+# 1. Python Bytecode & Cache Terkompilasi
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 2. Jupyter Notebook Checkpoints & Ekspor Autosave
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+*.nbconvert.ipynb
+
+# 3. Lingkungan Virtual Python (Virtual Environments)
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# 4. Konfigurasi IDE & Text Editor (VS Code, PyCharm, dll)
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# 5. Berkas Sistem Operasi (Windows & macOS)
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# 6. Log, Diagnostik, dan Berkas Sementara
+*.log
+*.tmp
+*.temp
+scratch/
+tmp/
+
+# 7. Checkpoint Model Berat Tambahan (Kecualikan model.onnx inti)
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.weights
+!model.onnx
+
+# 8. Berkas Prototipe Legacy yang Didepresiasi
+ocr.py
