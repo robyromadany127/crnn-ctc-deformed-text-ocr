@@ -11,8 +11,9 @@ Alur Pemrosesan dan Fungsi Setiap Komponen:
 1. Penanganan Transparansi (Alpha Channel Blending):
    - Alasan Digunakan: Citra berformat PNG sering kali menyimpan latar belakang transparan
      dengan nilai RGB (0, 0, 0) yang tampak hitam pekat jika dibaca tanpa kanal alfa.
-   - Fungsi: Mengganti seluruh piksel transparan (Alpha = 0) menjadi warna putih solid (255, 255, 255)
-     agar kontras antara teks dan latar belakang tetap terjaga sempurna.
+   - Fungsi: Meleburkan citra ke kanvas putih solid (255, 255, 255) dengan bobot kanal alfa,
+     C = (A/255) * I + (1 - A/255) * 255, sehingga piksel transparan (Alpha = 0) menjadi putih
+     dan kontras antara teks dan latar belakang tetap terjaga.
 
 2. Penskalaan Spasial Aspek-Rasio Terjaga (Aspect-Ratio Preserved Resizing):
    - Alasan Digunakan: Lapisan konvolusi pada model neural network mensyaratkan dimensi tinggi
@@ -28,8 +29,8 @@ Alur Pemrosesan dan Fungsi Setiap Komponen:
      menghemat beban komputasi memori hingga 66.7%.
 
 4. Normalisasi Intensitas Numerik (Min-Max Scaling):
-   - Alasan Digunakan: Nilai piksel nguyên 8-bit [0, 255] memiliki rentang dinamis yang terlalu besar
-     dan menyebabkan ledakan gradien (gradient explosion) pada aktivasi jaringan saraf.
+   - Alasan Digunakan: Model pra-latih dilatih dengan masukan berskala [0.0, 1.0], sehingga nilai piksel
+     bulat 8-bit [0, 255] harus diskalakan ulang agar sesuai dengan kondisi saat pelatihan.
    - Fungsi: Mentransformasikan nilai matriks piksel ke rentang float32 [0.0, 1.0] dengan membagi 255.0.
 
 5. Penataan Topologi Tensor (NCHW Tensor Structuring):
@@ -143,11 +144,12 @@ class StandaloneOCR:
         5. NCHW Reshaping: Pembentukan topologi memori tensor 4D [1, 1, 64, W].
         """
         # 1. Penanganan Transparansi (Alpha Channel Blending)
-        if image.mode == "RGBA":
-            arr_rgba = np.array(image)
-            is_transparent = (arr_rgba[:, :, 3] == 0)
-            arr_rgba[is_transparent, :3] = 255
-            image = Image.fromarray(arr_rgba[:, :, :3], mode="RGB")
+        # C = (A/255) * I + (1 - A/255) * 255  (komposit di atas kanvas putih solid)
+        if image.mode in ("RGBA", "LA") or (image.mode == "P" and "transparency" in image.info):
+            image_rgba = image.convert("RGBA")
+            canvas = Image.new("RGB", image_rgba.size, (255, 255, 255))
+            canvas.paste(image_rgba, mask=image_rgba.split()[3])
+            image = canvas
         elif image.mode != "RGB":
             image = image.convert("RGB")
 

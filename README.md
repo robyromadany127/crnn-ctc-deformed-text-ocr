@@ -126,7 +126,7 @@ Penyusunan proyek ini menjunjung tinggi orisinalitas dan etika riset dengan memb
 * **Bobot Model Jaringan Saraf & Basis Charset**: Diadopsi dan diekstrak dari repositori *open-source* **[ddddocr](https://github.com/sml2h3/ddddocr)** karya pengembang **sml2h3** (dirilis di bawah lisensi MIT).
 * **Mesin Inferensi Graf**: Didukung oleh mesin berkinerja tinggi **[ONNX Runtime](https://github.com/microsoft/onnxruntime)** karya Microsoft Corporation.
 * **Sitasi Ilmiah Utama**:
-  * *Shi, B., Bai, X., & Yao, C. (2015). An End-to-End Trainable Neural Network for Image-based Sequence Recognition and Its Application to Scene Text Recognition. IEEE TPAMI.*
+  * *Shi, B., Bai, X., & Yao, C. (2017). An End-to-End Trainable Neural Network for Image-based Sequence Recognition and Its Application to Scene Text Recognition. IEEE TPAMI, 39(11), 2298–2304.*
   * *Graves, A., Fernández, S., Gomez, F., & Schmidhuber, J. (2006). Connectionist Temporal Classification: Labelling Unsegmented Sequence Data with Recurrent Neural Networks. ICML.*
   * *von Ahn, L., Blum, M., Hopper, N. J., & Langford, J. (2003). CAPTCHA: Using Hard AI Problems for Security. EUROCRYPT.*
 

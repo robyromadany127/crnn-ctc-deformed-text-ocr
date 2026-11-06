@@ -64,7 +64,7 @@ $$Y(x, y) = 0.299 \cdot R(x, y) + 0.587 \cdot G(x, y) + 0.114 \cdot B(x, y)$$
 *Dampak Efisiensi*: Matriks citra berkurang dari $(H, W, 3)$ menjadi $(H, W, 1)$, menghemat konsumsi memori kerja dan *bandwidth* komputasi hingga **66.7%** tanpa kehilangan ketajaman fitur teks.
 
 ### 1.4 Normalisasi Intensitas Numerik (Min-Max Scaling)
-Representasi citra standar menggunakan bilangan bulat 8-bit `uint8` dengan rentang $[0, 255]$. Memberikan nilai skala besar ke dalam jaringan saraf tiruan dapat menyebabkan ledakan gradien (*gradient explosion*) dan kejenuhan fungsi aktivasi non-linear.
+Representasi citra standar menggunakan bilangan bulat 8-bit `uint8` dengan rentang $[0, 255]$. Model pra-latih yang digunakan dilatih dengan masukan berskala $[0.0, 1.0]$, sehingga skala masukan pada tahap inferensi harus disamakan agar distribusi aktivasi jaringan sesuai dengan kondisi saat pelatihan.
 
 Penskalaan linier dilakukan dengan membagi seluruh elemen matriks dengan skalar $255.0$:
 
@@ -179,7 +179,7 @@ Pada era tahun 2000-an, sistem pertahanan ini efektif karena algoritma OCR tradi
 Kombinasi teknik modern berhasil membongkar seluruh mekanisme pertahanan CAPTCHA v1:
 1. **Derau Garis dan Titik (*Noise & Background Lines*) Teranulir**: Filter konvolusi (CNN) secara inheren mempelajari fitur invariansi translasi dan mampu mengabaikan garis derau yang tidak memiliki pola struktur ortografis teks.
 2. **Segmentasi Tidak Lagi Diperlukan**: Adanya CTC Loss mengeliminasi kebutuhan memotong huruf. Huruf yang bersambung (*connected scripts*) atau tumpang tindih (*overlapping characters*) dapat dibaca secara sekuensial oleh BiLSTM.
-3. **Tingkat Akurasi Melampaui Batas Toleransi Manusia**: Model Deep Learning mampu mencapai akurasi pembacaan di atas **95%**, bahkan sering kali membaca lebih teliti daripada manusia pada teks yang sangat buram.
+3. **Tingkat Akurasi Tinggi**: Model Deep Learning dapat mencapai akurasi pembacaan yang tinggi pada teks terdistorsi. Pada 14 sampel uji di repositori ini, 13 citra terbaca tepat (**92,86%**, CER 1,19%; label kebenaran diverifikasi visual), dengan satu kesalahan `'a'` → `'q'` pada citra `jft7qb.png` (seharusnya `jft7ab`).
 
 ### 4.3 Vektor Ancaman Terhadap Sistem Web Terbuka
 Runtuhnya sistem verifikasi teks dasar menimbulkan celah keamanan siber yang signifikan:
@@ -206,7 +206,7 @@ Berikut adalah pemetaan operasional setiap tahapan kode di dalam `standalone_ocr
 | **2** | `apply_alpha_blending` | Menetralkan kanal transparansi PNG menjadi latar putih solid `(255, 255, 255)` untuk mencegah latar belakang menjadi hitam pekat. |
 | **3** | `resize_keep_aspect_ratio` | Mengunci tinggi $H=64\text{ px}$ dan menghitung lebar $W$ proporsional menggunakan interpolasi bilinier guna mempertahankan rasio aspek huruf. |
 | **4** | `img.convert("L")` | Mereduksi 3-kanal RGB menjadi 1-kanal skala keabuan berstandar ITU-R BT.601, menghemat memori hingga 66.7%. |
-| **5** | Min-Max Normalization | Penskalaan matriks piksel `uint8` $[0, 255]$ ke `float32` $[0.0, 1.0]$ guna menjamin stabilitas gradien dan aktivasi model. |
+| **5** | Min-Max Normalization | Penskalaan matriks piksel `uint8` $[0, 255]$ ke `float32` $[0.0, 1.0]$ guna menyamakan skala masukan dengan skala saat model dilatih. |
 | **6** | `np.expand_dims` (NCHW) | Membentuk tensor 4D `[1, 1, 64, W]` sesuai dengan konvensi memori antarmuka ONNX Runtime. |
 | **7** | `ort_session.run()` | Mengeksekusi *forward pass* inferensi pada CPU, menghasilkan representasi matriks *logits* berdimensi $(T, 1, 8210)$. |
 | **8** | Softmax Terstabilkan | Menghitung probabilitas kelas karakter menggunakan teknik pengurangan nilai maksimum (*max-subtraction*). |
@@ -219,7 +219,7 @@ Berikut adalah pemetaan operasional setiap tahapan kode di dalam `standalone_ocr
 
 ## 6. Referensi & Sitasi Akademik
 
-1. **Shi, B., Bai, X., & Yao, C. (2015).** *An End-to-End Trainable Neural Network for Image-based Sequence Recognition and Its Application to Scene Text Recognition.* IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI), 39(11), 2298–2304.
+1. **Shi, B., Bai, X., & Yao, C. (2017).** *An End-to-End Trainable Neural Network for Image-based Sequence Recognition and Its Application to Scene Text Recognition.* IEEE Transactions on Pattern Analysis and Machine Intelligence (TPAMI), 39(11), 2298–2304. https://doi.org/10.1109/TPAMI.2016.2646371
 2. **Graves, A., Fernández, S., Gomez, F., & Schmidhuber, J. (2006).** *Connectionist Temporal Classification: Labelling Unsegmented Sequence Data with Recurrent Neural Networks.* Proceedings of the 23rd International Conference on Machine Learning (ICML '06), 369–376.
 3. **von Ahn, L., Blum, M., Hopper, N. J., & Langford, J. (2003).** *CAPTCHA: Using Hard AI Problems for Security.* In International Conference on the Theory and Applications of Cryptographic Techniques (EUROCRYPT 2003), Lecture Notes in Computer Science, vol 2656. Springer, Berlin, Heidelberg.
 4. **Bursztein, E., Martin, M., & Mitchell, J. (2011).** *Text-based CAPTCHA Strengths and Weaknesses.* Proceedings of the 18th ACM Conference on Computer and Communications Security (CCS '11), 125–138.
